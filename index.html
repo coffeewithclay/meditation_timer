@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Meditation Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+    input {
+      width: 80%;
+    }
+    button {
+      background-color: white;
+      color: black;
+      cursor: pointer;
+    }
+    #timer {
+      font-size: 48px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Meditation Timer</h1>
+    <label for="duration">Enter duration (minutes):</label>
+    <input type="number" id="duration" value="10" min="1">
+    <br>
+    <button id="startBtn">Start</button>
+    <div id="timer">00:00</div>
+  </div>
+
+  <!-- Audio elements for interval and end bells -->
+  <audio id="intervalSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+  <audio id="endSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+
+  <script>
+    let timerInterval;
+    let totalSeconds;
+    let elapsedSeconds = 0;
+
+    const startBtn = document.getElementById('startBtn');
+    const timerDisplay = document.getElementById('timer');
+    const durationInput = document.getElementById('duration');
+    const intervalSound = document.getElementById('intervalSound');
+    const endSound = document.getElementById('endSound');
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+    }
+
+    function updateTimer() {
+      elapsedSeconds++;
+      const remainingSeconds = totalSeconds - elapsedSeconds;
+      
+      // Update display
+      timerDisplay.textContent = formatTime(Math.max(remainingSeconds, 0));
+      
+      // Play interval bell every 2 minutes, as long as there's time left
+      if (elapsedSeconds % 120 === 0 && remainingSeconds > 0) {
+        intervalSound.play();
+      }
+      
+      // End timer and play final bell
+      if (remainingSeconds <= 0) {
+        clearInterval(timerInterval);
+        endSound.play();
+      }
+    }
+
+    startBtn.addEventListener('click', () => {
+      // Reset any existing timer
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      elapsedSeconds = 0;
+      const durationMinutes = parseInt(durationInput.value, 10);
+      totalSeconds = durationMinutes * 60;
+      timerDisplay.textContent = formatTime(totalSeconds);
+      // Start countdown after a one-second delay
+      timerInterval = setInterval(updateTimer, 1000);
+    });
+  </script>
+</body>
+</html>
